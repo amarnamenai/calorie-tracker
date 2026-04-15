@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calorie Tracker</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 16px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+        }
+
+        .date {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 8px 16px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: #e3f2fd;
+            color: #1976d2;
+            border-color: #90caf9;
+        }
+
+        .tab-btn:hover {
+            background: #f5f5f5;
+        }
+
+        .macro-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .macro-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .macro-label {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .macro-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .macro-goal {
+            font-size: 11px;
+            color: #999;
+        }
+
+        .macro-bar {
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .macro-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .foods-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .food-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .food-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .food-name-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .food-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .food-category {
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .food-consumed {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .food-consumed.over {
+            color: #d32f2f;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .food-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 11px;
+        }
+
+        .food-macros {
+            color: #999;
+        }
+
+        .food-remaining {
+            color: #666;
+        }
+
+        .food-remaining.complete {
+            color: #2e7d32;
+            font-weight: 600;
+        }
+
+        .food-remaining.over {
+            color: #d32f2f;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .food-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            background: #fafafa;
+        }
+
+        .food-input:focus {
+            outline: none;
+            border-color: #1976d2;
+            background: white;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .btn-add {
+            background: #1976d2;
+            color: white;
+        }
+
+        .btn-add:hover {
+            background: #1565c0;
+        }
+
+        .btn-reset {
+            background: transparent;
+            color: #666;
+            border: 1px solid #ddd;
+        }
+
+        .btn-reset:hover {
+            background: #f5f5f5;
+        }
+
+        .btn-goals {
+            background: #f0f0f0;
+            color: #333;
+            padding: 6px 14px;
+            font-size: 13px;
+        }
+
+        .btn-goals:hover {
+            background: #e0e0e0;
+        }
+
+        .goals-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 1000;
+        }
+
+        .goals-content {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .goals-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .goals-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+        }
+
+        .goal-item {
+            margin-bottom: 16px;
+        }
+
+        .goal-label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        .goal-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .goal-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .btn-save {
+            flex: 1;
+            background: #1976d2;
+            color: white;
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        .btn-save:hover {
+            background: #1565c0;
+        }
+
+        .saved-notice {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2e7d32;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 2000;
+        }
+
+        .history-item {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .history-date {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .history-stats {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .history-foods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 8px;
+        }
+
+        .history-food {
+            text-align: center;
+        }
+
+        .history-food-name {
+            font-size: 9px;
+            color: #999;
+            margin-bottom: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .history-food-bar {
+            height: 4px;
+            background: #f0f0f0;
+            border-radius: 2px;
+            margin-bottom: 2px;
+            overflow: hidden;
+        }
+
+        .history-food-pct {
+            font-size: 9px;
+            color: #999;
+        }
+
+        .empty-state {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .footer {
+            font-size: 11px;
+            color: #999;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 8px;
+            }
+
+            .container {
+                padding: 16px;
+            }
+
+            .macro-summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="app"></div>
+    </div>
+
+    <script>
+        // Food data
+        const FOODS = [
+            { id: "potatoes", name: "Potatoes", unit: "g", defaultTarget: 600, perUnit: { cal: 0.77, carbs: 0.17, protein: 0.02, fat: 0.001 }, category: "Carbs", color: "#BA7517" },
+            { id: "rice", name: "Steamed Rice", unit: "g", defaultTarget: 250, perUnit: { cal: 1.30, carbs: 0.28, protein: 0.027, fat: 0.003 }, category: "Carbs", color: "#BA7517" },
+            { id: "chicken", name: "Chicken Breast", unit: "g", defaultTarget: 300, perUnit: { cal: 1.65, carbs: 0, protein: 0.31, fat: 0.036 }, category: "Protein", color: "#185FA5" },
+            { id: "eggs", name: "Eggs", unit: "pcs", defaultTarget: 8, perUnit: { cal: 78, carbs: 0.6, protein: 6, fat: 5 }, category: "Protein", color: "#185FA5" },
+            { id: "vegetables", name: "Vegetables", unit: "g", defaultTarget: 150, perUnit: { cal: 0.25, carbs: 0.05, protein: 0.02, fat: 0.003 }, category: "Veggies", color: "#3B6D11" },
+            { id: "bananas", name: "Bananas", unit: "pcs", defaultTarget: 4, perUnit: { cal: 105, carbs: 27, protein: 1.3, fat: 0.4 }, category: "Fruit", color: "#854F0B" },
+            { id: "nuts", name: "Nuts", unit: "g", defaultTarget: 50, perUnit: { cal: 6.07, carbs: 0.20, protein: 0.20, fat: 0.50 }, category: "Fats", color: "#993C1D" },
+        ];
+
+        const CATEGORY_STYLE = {
+            Carbs:   { bg: "#FAEEDA", text: "#5aad0bdc" },
+            Protein: { bg: "#E6F1FB", text: "#0C447C" },
+            Veggies: { bg: "#EAF3DE", text: "#27500A" },
+            Fruit:   { bg: "#FAEEDA", text: "#854F0B" },
+            Fats:    { bg: "#FAECE7", text: "#712B13" },
+        };
+
+        // State
+        let state = {
+            consumed: {},
+            goals: {},
+            inputs: {},
+            goalInputs: {},
+            weekHistory: {},
+            tab: 'today',
+            showGoals: false,
+            saved: false
+        };
+
+        // Initialize empty consumed
+        function emptyConsumed() {
+            const c = {};
+            FOODS.forEach(f => c[f.id] = 0);
+            return c;
+        }
+
+        // Initialize default goals
+        function defaultGoals() {
+            const g = {};
+            FOODS.forEach(f => g[f.id] = f.defaultTarget);
+            return g;
+        }
+
+        // Calculate macros
+        function getMacros(food, amount) {
+            return {
+                cal: food.perUnit.cal * amount,
+                carbs: food.perUnit.carbs * amount,
+                protein: food.perUnit.protein * amount,
+                fat: food.perUnit.fat * amount,
+            };
+        }
+
+        // Get today's date
+        function getToday() {
+            return new Date().toISOString().split('T')[0];
+        }
+
+        // Format date for display
+        function formatDate(dateStr) {
+            const date = new Date(dateStr + 'T00:00:00');
+            return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        }
+
+        // Load data from localStorage
+        function loadData() {
+            const today = getToday();
+            
+            // Load today's consumed
+            const consumedData = localStorage.getItem(`tracker:${today}`);
+            if (consumedData) {
+                state.consumed = JSON.parse(consumedData);
+            } else {
+                state.consumed = emptyConsumed();
+            }
+
+            // Load goals
+            const goalsData = localStorage.getItem('tracker:goals');
+            if (goalsData) {
+                state.goals = JSON.parse(goalsData);
+                state.goalInputs = {};
+                Object.keys(state.goals).forEach(k => {
+                    state.goalInputs[k] = String(state.goals[k]);
+                });
+            } else {
+                state.goals = defaultGoals();
+                state.goalInputs = {};
+                FOODS.forEach(f => {
+                    state.goalInputs[f.id] = String(f.defaultTarget);
+                });
+            }
+
+            // Initialize inputs
+            state.inputs = {};
+            FOODS.forEach(f => state.inputs[f.id] = '');
+
+            // Load week history
+            state.weekHistory = {};
+            for (let i = 1; i <= 7; i++) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const ds = d.toISOString().split('T')[0];
+                const histData = localStorage.getItem(`tracker:${ds}`);
+                if (histData) {
+                    state.weekHistory[ds] = JSON.parse(histData);
+                }
+            }
+        }
+
+        // Save consumed data
+        function saveConsumed() {
+            const today = getToday();
+            localStorage.setItem(`tracker:${today}`, JSON.stringify(state.consumed));
+        }
+
+        // Handle add food
+        function handleAdd(foodId) {
+            const val = parseFloat(state.inputs[foodId]);
+            if (isNaN(val) || val <= 0) return;
+            
+            state.consumed[foodId] = Math.round(((state.consumed[foodId] || 0) + val) * 10) / 10;
+            state.inputs[foodId] = '';
+            saveConsumed();
+            render();
+        }
+
+        // Handle reset food
+        function handleReset(foodId) {
+            state.consumed[foodId] = 0;
+            saveConsumed();
+            render();
+        }
+
+        // Handle input change
+        function handleInputChange(foodId, value) {
+            state.inputs[foodId] = value;
+            render();
+        }
+
+        // Handle goal input change
+        function handleGoalInputChange(foodId, value) {
+            state.goalInputs[foodId] = value;
+            render();
+        }
+
+        // Save goals
+        function saveGoals() {
+            const newGoals = {};
+            FOODS.forEach(f => {
+                const v = parseFloat(state.goalInputs[f.id]);
+                newGoals[f.id] = isNaN(v) || v <= 0 ? f.defaultTarget : v;
+            });
+            state.goals = newGoals;
+            localStorage.setItem('tracker:goals', JSON.stringify(newGoals));
+            state.showGoals = false;
+            state.saved = true;
+            render();
+            setTimeout(() => {
+                state.saved = false;
+                render();
+            }, 2000);
+        }
+
+        // Calculate totals
+        function calculateTotals() {
+            const totals = { cal: 0, carbs: 0, protein: 0, fat: 0 };
+            const goalTotals = { cal: 0, carbs: 0, protein: 0, fat: 0 };
+            
+            FOODS.forEach(f => {
+                const m = getMacros(f, state.consumed[f.id] || 0);
+                const gm = getMacros(f, state.goals[f.id] || f.defaultTarget);
+                totals.cal += m.cal;
+                totals.carbs += m.carbs;
+                totals.protein += m.protein;
+                totals.fat += m.fat;
+                goalTotals.cal += gm.cal;
+                goalTotals.carbs += gm.carbs;
+                goalTotals.protein += gm.protein;
+                goalTotals.fat += gm.fat;
+            });
+            
+            return { totals, goalTotals };
+        }
+
+        // Render function
+        function render() {
+            const app = document.getElementById('app');
+            const { totals, goalTotals } = calculateTotals();
+            const today = getToday();
+
+            let html = `
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; gap: 8px;">
+                    <div>
+                        <h2>Calorie Tracker</h2>
+                        <div class="date">${formatDate(today)}</div>
+                    </div>
+                    <button class="btn btn-goals" onclick="openGoals()">Set Goals</button>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-btn ${state.tab === 'today' ? 'active' : ''}" onclick="changeTab('today')">Today</button>
+                    <button class="tab-btn ${state.tab === 'week' ? 'active' : ''}" onclick="changeTab('week')">Week</button>
+                </div>
+            `;
+
+            if (state.tab === 'today') {
+                // Macro summary
+                html += '<div class="macro-summary">';
+                const macros = [
+                    { label: "Calories", val: Math.round(totals.cal), goal: Math.round(goalTotals.cal), unit: "", color: "#3B6D11" },
+                    { label: "Carbs", val: Math.round(totals.carbs), goal: Math.round(goalTotals.carbs), unit: "g", color: "#BA7517" },
+                    { label: "Protein", val: Math.round(totals.protein), goal: Math.round(goalTotals.protein), unit: "g", color: "#185FA5" },
+                    { label: "Fat", val: Math.round(totals.fat), goal: Math.round(goalTotals.fat), unit: "g", color: "#993C1D" },
+                ];
+                
+                macros.forEach(m => {
+                    const pct = m.goal > 0 ? Math.min(100, Math.round(m.val / m.goal * 100)) : 0;
+                    html += `
+                        <div class="macro-card">
+                            <div class="macro-label">${m.label}</div>
+                            <div class="macro-value">
+                                ${m.val}<span class="macro-goal">/${m.goal}${m.unit}</span>
+                            </div>
+                            <div class="macro-bar">
+                                <div class="macro-bar-fill" style="width: ${pct}%; background: ${m.color};"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+
+                // Food cards
+                html += '<div class="foods-list">';
+                FOODS.forEach(f => {
+                    const c = state.consumed[f.id] || 0;
+                    const g = state.goals[f.id] || f.defaultTarget;
+                    const remaining = Math.max(0, g - c);
+                    const pct = Math.min(100, g > 0 ? Math.round(c / g * 100) : 0);
+                    const macros = getMacros(f, c);
+                    const isOver = c > g;
+                    const catStyle = CATEGORY_STYLE[f.category] || {};
+
+                    html += `
+                        <div class="food-card">
+                            <div class="food-header">
+                                <div class="food-name-row">
+                                    <span class="food-name">${f.name}</span>
+                                    <span class="food-category" style="background: ${catStyle.bg}; color: ${catStyle.text};">${f.category}</span>
+                                </div>
+                                <span class="food-consumed ${isOver ? 'over' : ''}">
+                                    ${Math.round(c * 10) / 10} / ${g} ${f.unit}
+                                </span>
+                            </div>
+
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${pct}%; background: ${isOver ? '#E24B4A' : f.color};"></div>
+                            </div>
+
+                            <div class="food-info">
+                                <span class="food-macros">
+                                    ${Math.round(macros.cal)} kcal &middot; P ${Math.round(macros.protein * 10) / 10}g &middot; C ${Math.round(macros.carbs * 10) / 10}g &middot; F ${Math.round(macros.fat * 10) / 10}g
+                                </span>
+                                <span class="food-remaining ${isOver ? 'over' : remaining === 0 ? 'complete' : ''}">
+                                    ${isOver 
+                                        ? `+${Math.round((c - g) * 10) / 10} ${f.unit} over` 
+                                        : remaining === 0 
+                                        ? 'Goal reached' 
+                                        : `${Math.round(remaining * 10) / 10} ${f.unit} left`}
+                                </span>
+                            </div>
+
+                            <div class="input-row">
+                                <input 
+                                    type="number" 
+                                    min="0" 
+                                    class="food-input" 
+                                    placeholder="Enter ${f.unit}..." 
+                                    value="${state.inputs[f.id]}"
+                                    onchange="handleInputChange('${f.id}', this.value)"
+                                    onkeydown="if(event.key==='Enter') handleAdd('${f.id}')"
+                                />
+                                <button class="btn btn-add" onclick="handleAdd('${f.id}')">Add</button>
+                                <button class="btn btn-reset" onclick="handleReset('${f.id}')">Reset</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            } else if (state.tab === 'week') {
+                // Week history
+                const historyEntries = Object.entries(state.weekHistory).sort((a, b) => b[0].localeCompare(a[0]));
+                
+                if (historyEntries.length === 0) {
+                    html += `
+                        <div class="empty-state">
+                            No history yet — start logging today and it will show up here tomorrow.
+                        </div>
+                    `;
+                } else {
+                    historyEntries.forEach(([date, data]) => {
+                        const dt = { cal: 0, protein: 0, carbs: 0 };
+                        FOODS.forEach(f => {
+                            const m = getMacros(f, data[f.id] || 0);
+                            dt.cal += m.cal;
+                            dt.protein += m.protein;
+                            dt.carbs += m.carbs;
+                        });
+
+                        html += `
+                            <div class="history-item">
+                                <div class="history-header">
+                                    <span class="history-date">${formatDate(date)}</span>
+                                    <div class="history-stats">
+                                        <span>${Math.round(dt.cal)} kcal</span>
+                                        <span>P ${Math.round(dt.protein)}g</span>
+                                        <span>C ${Math.round(dt.carbs)}g</span>
+                                    </div>
+                                </div>
+                                <div class="history-foods">
+                        `;
+
+                        FOODS.forEach(f => {
+                            const amt = data[f.id] || 0;
+                            const g = state.goals[f.id] || f.defaultTarget;
+                            const pct = g > 0 ? Math.min(100, Math.round(amt / g * 100)) : 0;
+
+                            html += `
+                                <div class="history-food">
+                                    <div class="history-food-name">${f.name.split(' ')[0]}</div>
+                                    <div class="history-food-bar">
+                                        <div style="height: 100%; width: ${pct}%; background: ${f.color};"></div>
+                                    </div>
+                                    <div class="history-food-pct">${pct}%</div>
+                                </div>
+                            `;
+                        });
+
+                        html += `
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            }
+
+            html += '<div class="footer">Nutritional values are estimates. Data is saved locally to your browser.</div>';
+
+            app.innerHTML = html;
+
+            // Render goals modal if open
+            if (state.showGoals) {
+                renderGoalsModal();
+            } else {
+                const modal = document.getElementById('goals-modal');
+                if (modal) modal.remove();
+            }
+
+            // Render saved notice if shown
+            if (state.saved) {
+                renderSavedNotice();
+            } else {
+                const notice = document.getElementById('saved-notice');
+                if (notice) notice.remove();
+            }
+        }
+
+        // Render goals modal
+        function renderGoalsModal() {
+            let existingModal = document.getElementById('goals-modal');
+            if (existingModal) existingModal.remove();
+
+            const modal = document.createElement('div');
+            modal.id = 'goals-modal';
+            modal.className = 'goals-modal';
+            modal.onclick = (e) => {
+                if (e.target === modal) closeGoals();
+            };
+
+            let content = `
+                <div class="goals-content">
+                    <div class="goals-header">
+                        <div class="goals-title">Set Daily Goals</div>
+                        <button class="close-btn" onclick="closeGoals()">&times;</button>
+                    </div>
+            `;
+
+            FOODS.forEach(f => {
+                content += `
+                    <div class="goal-item">
+                        <div class="goal-label">${f.name} (${f.unit})</div>
+                        <input 
+                            type="number" 
+                            min="0" 
+                            class="goal-input" 
+                            value="${state.goalInputs[f.id]}"
+                            onchange="handleGoalInputChange('${f.id}', this.value)"
+                        />
+                    </div>
+                `;
+            });
+
+            content += `
+                    <div class="goal-actions">
+                        <button class="btn btn-save" onclick="saveGoals()">Save Goals</button>
+                    </div>
+                </div>
+            `;
+
+            modal.innerHTML = content;
+            document.body.appendChild(modal);
+        }
+
+        // Render saved notice
+        function renderSavedNotice() {
+            let existingNotice = document.getElementById('saved-notice');
+            if (existingNotice) return;
+
+            const notice = document.createElement('div');
+            notice.id = 'saved-notice';
+            notice.className = 'saved-notice';
+            notice.textContent = 'Goals saved successfully!';
+            document.body.appendChild(notice);
+        }
+
+        // Global functions
+        window.changeTab = function(tab) {
+            state.tab = tab;
+            render();
+        };
+
+        window.openGoals = function() {
+            state.showGoals = true;
+            render();
+        };
+
+        window.closeGoals = function() {
+            state.showGoals = false;
+            render();
+        };
+
+        window.handleAdd = handleAdd;
+        window.handleReset = handleReset;
+        window.handleInputChange = handleInputChange;
+        window.handleGoalInputChange = handleGoalInputChange;
+        window.saveGoals = saveGoals;
+
+        // Initialize
+        loadData();
+        render();
+    </script>
+</body>
+</html>
